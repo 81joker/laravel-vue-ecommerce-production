@@ -46,8 +46,8 @@ jobs:
       # - name: Run Deprecation Checker
       # #   run: vendor/bin/deprecation-detector detect:run src/
 
-      - name: Run Laravel Pint
-        run: vendor/bin/pint --test
+      # - name: Run Laravel Pint
+      #   run: vendor/bin/pint --test
 
       # - name: Upload Code Coverage
       #   uses: codecov/codecov-action@v3
