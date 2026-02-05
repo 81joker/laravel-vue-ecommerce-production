@@ -9,44 +9,40 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout repository code
       - uses: actions/checkout@v4
 
-      # 2. Setup PHP environment
       - uses: shivammathur/setup-php@v2
         with:
           php-version: "8.4"
 
-      # 3. Get Composer cache directory
       - name: Get Composer Cache Directory
         id: composer-cache
         run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
 
-      # 4. Cache Composer dependencies
       - name: Cache Composer dependencies
         uses: actions/cache@v3
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-composer-
 
-      # 5. Prepare environment file
-      - name: Copy .env
-        run: php -r "file_exists('.env') || copy('.env.example', '.env');"
+      - name: Prepare environment
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+          chmod -R 777 storage bootstrap/cache
 
-      # 6. Install PHP dependencies
       - name: Install Dependencies
-        run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+        run: composer install --no-interaction --prefer-dist
 
-      # 7. Generate application key
-      - name: Generate key
-        run: php artisan key:generate
-
-      # 8. Set directory permissions
-      - name: Directory Permissions
-        run: chmod -R 777 storage bootstrap/cache
-
-      # 9. Run Laravel Pint
-      - name: Run Laravel Pint
+      - name: Run Laravel Pint (Lint)
         run: vendor/bin/pint --test
+
+      # 🔔 Slack notification on failure
+      - name: Notify Slack (Failure)
+        if: failure()
+        run: |
+          curl -X POST -H 'Content-type: application/json' \
+          --data "{
+            \"text\": \"❌ CI Failed\nProject: laravel-vue-ecommerce-production\nBranch: ${{ github.ref_name }}\nRun: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}\"
+          }" \
+          ${{ secrets.SLACK_WEBHOOK_URL }}
