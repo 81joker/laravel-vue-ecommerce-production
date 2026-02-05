@@ -68,9 +68,8 @@ jobs:
                     laravel-ci sh -c "
                       cp .env.example .env &&
                       php artisan key:generate &&
-                      php artisan migrate --force &&
+                      php artisan migrate --force 
                       "
-                    #php artisan test
 
     # =====================
     # 3. BUILD (Production)
