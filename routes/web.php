@@ -33,7 +33,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/order/view/{order}', [OrderController::class, 'view'])->name('order.view');
 });
 
-
 // FIXME:   @nrhad.al.timimi@gmail.com @Nehad you should control this router and delete it if you don't need it, because it's a security risk to have an open route like this
 // Route::get('/dashboard', function () {
 //     return view('dashboard');
@@ -45,4 +44,4 @@ Route::middleware(['auth', 'verified'])->group(function () {
 //     Route::delete('/profiles', [ProfileController::class, 'destroy'])->name('profile.destroy');
 // });
 
-require __DIR__ . '/auth.php';
+require __DIR__.'/auth.php';
