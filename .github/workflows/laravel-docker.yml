@@ -39,8 +39,7 @@ jobs:
             # 4. Run Laravel tests inside Docker container
             - name: Run tests inside Docker
               run: |
-
-                  docker run --rm \
+                  docker run --rm  --network host\
                       -e APP_ENV=testing \
                       -e DB_CONNECTION=mysql \
                       -e DB_HOST=127.0.0.1 \
