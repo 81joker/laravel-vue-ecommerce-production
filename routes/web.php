@@ -34,6 +34,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 // FIXME:   @nrhad.al.timimi@gmail.com @Nehad you should control this router and delete it if you don't need it, because it's a security risk to have an open route like this
+// TODO:   @nrhad.al.timimi@gmail.com @Nehad you should control this router and delete it if you don't need it, because it's a security risk to have an open route like this
 // Route::get('/dashboard', function () {
 //     return view('dashboard');
 // })->middleware(['auth', 'verified'])->name('dashboard');
