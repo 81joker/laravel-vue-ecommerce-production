@@ -1,0 +1,51 @@
+# =========================
+# CI Dockerfile for Laravel
+# =========================
+
+FROM php:8.3-cli-alpine
+
+# Install system dependencies
+RUN apk add --no-cache \
+    git \
+    curl \
+    unzip \
+    zip \
+    icu-dev \
+    oniguruma-dev \
+    libzip-dev \
+    mysql-client
+
+# Install PHP extensions required by Laravel
+RUN docker-php-ext-install \
+    pdo \
+    pdo_mysql \
+    mbstring \
+    intl \
+    zip
+
+# Install Composer
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
+# Set working directory
+WORKDIR /var/www/html
+
+# Copy composer files first (better layer caching)
+COPY composer.json composer.lock ./
+
+# Install PHP dependencies (optimized for CI)
+RUN composer install \
+    --no-interaction \
+    --prefer-dist \
+    --no-progress \
+    --optimize-autoloader
+
+# Copy application source
+COPY . .
+
+# Prepare Laravel environment
+RUN cp .env.example .env \
+    && php artisan key:generate \
+    && php artisan optimize:clear
+
+# Default command (can be overridden in CI)
+CMD ["php", "artisan", "test"]
