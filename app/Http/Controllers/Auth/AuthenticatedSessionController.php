@@ -2,16 +2,16 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\Models\User;
-use Illuminate\Support\Str;
 use App\Helpers\Cart;
-use Illuminate\View\View;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Auth\LoginRequest;
+use App\Models\User;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Http\RedirectResponse;
-use App\Http\Requests\Auth\LoginRequest;
+use Illuminate\Support\Str;
+use Illuminate\View\View;
 use Laravel\Socialite\Facades\Socialite;
 
 class AuthenticatedSessionController extends Controller
@@ -33,6 +33,7 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
         Cart::moveCartItemsIntoDb();
+
         return redirect()->intended(route('home', absolute: false));
     }
 
@@ -59,13 +60,13 @@ class AuthenticatedSessionController extends Controller
     public function githubRedirect()
     {
         // get auth request back from github to authenticate user
-         $user = Socialite::driver('github')->user();
+        $user = Socialite::driver('github')->user();
 
         // if the user doesn't exist, create a new user
         // if they do, log them in
         // either way, authenticate the user into the application and redirect afterwards
         // $user->token
-        
+
         $user = User::firstOrCreate(
             ['email' => $user->email],
             [
@@ -73,12 +74,13 @@ class AuthenticatedSessionController extends Controller
                 // 'email' => $user->getEmail(),
                 // 'avatar' => $user->getAvatar(),
                 'password' => Hash::make(Str::random(16)), // Set a default password or handle it as needed
-                ]
+            ]
         );
         Auth::login($user, true);
 
         return redirect('/');
     }
+
     public function google()
     {
         // send the user to request to Google
@@ -88,7 +90,7 @@ class AuthenticatedSessionController extends Controller
     public function googleRedirect()
     {
         // get auth request back from google to authenticate user
-         $user = Socialite::driver('google')->user();
+        $user = Socialite::driver('google')->user();
 
         // if the user doesn't exist, create a new user
         // if they do, log them in
@@ -101,7 +103,7 @@ class AuthenticatedSessionController extends Controller
                 // 'email' => $user->getEmail(),
                 // 'avatar' => $user->getAvatar(),
                 'password' => Hash::make(Str::random(16)), // Set a default password or handle it as needed
-                ]
+            ]
         );
         Auth::login($user, true);
 

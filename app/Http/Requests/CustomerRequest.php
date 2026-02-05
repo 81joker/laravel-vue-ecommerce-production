@@ -2,9 +2,7 @@
 
 namespace App\Http\Requests;
 
-use App\Enums\CustomerStatus;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rules\Enum;
 
 class CustomerRequest extends FormRequest
 {
@@ -66,5 +64,4 @@ class CustomerRequest extends FormRequest
             'shippingAddress.country_code' => 'country',
         ];
     }
-
 }

@@ -2,23 +2,22 @@
 
 namespace App\Models;
 
-use App\Models\Category;
-use App\Models\ProductImage;
-use Spatie\Sluggable\HasSlug;
-use Laravel\Sanctum\HasApiTokens;
-use Spatie\Sluggable\SlugOptions;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Laravel\Sanctum\HasApiTokens;
+use Spatie\Sluggable\HasSlug;
+use Spatie\Sluggable\SlugOptions;
 
 class Product extends Model
 {
+    use HasApiTokens;
+    use HasFactory;
     use HasSlug;
     use SoftDeletes;
-    use HasFactory;
-    use HasApiTokens;
-    protected $fillable = ['title', 'description', 'price', 'quantity', 'image', 'image_name','image_mime', 'image_size','published', 'created_by', 'updated_by'];
+
+    protected $fillable = ['title', 'description', 'price', 'quantity', 'image', 'image_name', 'image_mime', 'image_size', 'published', 'created_by', 'updated_by'];
 
     protected $casts = [
         'published' => 'boolean',
@@ -37,16 +36,18 @@ class Product extends Model
     /**
      * Get the options for generating the slug.
      */
-    public function getSlugOptions() : SlugOptions
+    public function getSlugOptions(): SlugOptions
     {
         return SlugOptions::create()
             ->generateSlugsFrom('title')
             ->saveSlugsTo('slug');
     }
+
     public function getRouteKeyName()
     {
         return 'slug';
     }
+
     public function categories(): BelongsToMany
     {
         return $this->belongsToMany(Category::class, 'product_categories');

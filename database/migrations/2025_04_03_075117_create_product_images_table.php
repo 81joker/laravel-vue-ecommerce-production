@@ -1,11 +1,11 @@
 <?php
 
+use Carbon\Carbon;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use Carbon\Carbon;
+use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
@@ -14,39 +14,38 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if (!Schema::hasTable('product_images')) {
+        if (! Schema::hasTable('product_images')) {
 
-        Schema::create('product_images', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('product_id');
-            $table->string('path', 255);
-            $table->string('url', 255);
-            $table->string('mime', 55);
-            $table->integer('size');
-            $table->integer('position')->nullable();
-            $table->timestamps();
-        });
-    }
+            Schema::create('product_images', function (Blueprint $table) {
+                $table->id();
+                $table->unsignedBigInteger('product_id');
+                $table->string('path', 255);
+                $table->string('url', 255);
+                $table->string('mime', 55);
+                $table->integer('size');
+                $table->integer('position')->nullable();
+                $table->timestamps();
+            });
+        }
 
-    DB::table('products')
-    ->chunkById(100, function ($products) {
-        $mapped = $products->map(function ($p) {
-            return [
-                'product_id' => $p->id,
-                'path' => '',
-                'url' => $p->image,
-                'mime' => $p->image_mime ?:  $p->image,
-                'size' => $p->image_size? $p->image_size : 0,
-                'position' => 1,
-                'created_at' => Carbon::now(),
-                'updated_at' => Carbon::now()
-            ];
-        });
+        DB::table('products')
+            ->chunkById(100, function ($products) {
+                $mapped = $products->map(function ($p) {
+                    return [
+                        'product_id' => $p->id,
+                        'path' => '',
+                        'url' => $p->image,
+                        'mime' => $p->image_mime ?: $p->image,
+                        'size' => $p->image_size ? $p->image_size : 0,
+                        'position' => 1,
+                        'created_at' => Carbon::now(),
+                        'updated_at' => Carbon::now(),
+                    ];
+                });
 
-        // Insert into product_images table
-        DB::table('product_images')->insert($mapped->toArray());
-    });
-
+                // Insert into product_images table
+                DB::table('product_images')->insert($mapped->toArray());
+            });
 
         // Schema::table('products', function (Blueprint $table) {
         //     $table->dropColumn('image');
@@ -81,7 +80,7 @@ return new class extends Migration
                             ->update([
                                 'image' => $image->url,
                                 'image_mime' => $image->mime,
-                                'image_size' => $image->size
+                                'image_size' => $image->size,
                             ]);
                     }
                 }

@@ -25,7 +25,7 @@ class UpdateUserRequest extends FormRequest
         return [
             'name' => ['max:55'],
             'email' => ['email'],
-            'password' => [ Password::min(5)],
+            'password' => [Password::min(5)],
             // 'password' => [Password::min(8)->numbers()->letters()->symbols()]
         ];
     }

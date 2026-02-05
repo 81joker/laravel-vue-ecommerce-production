@@ -2,20 +2,19 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\OrderStatus;
+use App\Enums\PaymentStatus;
 use App\Helpers\Cart;
+use App\Models\CartItem;
 use App\Models\Order;
+use App\Models\OrderItem;
 use App\Models\Payment;
 use App\Models\Product;
-use App\Models\CartItem;
-use App\Models\OrderItem;
-use App\Enums\OrderStatus;
-use Illuminate\Support\Arr;
-use App\Enums\PaymentStatus;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 
 class CheckoutController extends Controller
 {
-
     public function checkout(Request $request)
     {
         \Stripe\Stripe::setApiKey(config('services.stripe.token'));
@@ -26,8 +25,8 @@ class CheckoutController extends Controller
         // $user = $request->user();
         $user = auth()->user();
 
-        if(!$user->customer->shippingAddress || !$user->customer->billingAddress){
-            return  redirect()->route('profile')->with('error', 'Please provide your Addresse');
+        if (! $user->customer->shippingAddress || ! $user->customer->billingAddress) {
+            return redirect()->route('profile')->with('error', 'Please provide your Addresse');
         }
         if ($user && $user->stripe_customer_id) {
             $customer_id = $user->stripe_customer_id;
@@ -54,7 +53,7 @@ class CheckoutController extends Controller
         foreach ($products as $product) {
             $quantity = $cartItems[$product->id]['quantity'];
 
-            $totalPrice += $product->price * $quantity ;
+            $totalPrice += $product->price * $quantity;
             $line_items[] = [
                 'price_data' => [
                     'currency' => 'usd',
@@ -64,12 +63,12 @@ class CheckoutController extends Controller
                     ],
                     'unit_amount' => $product->price * 100,
                 ],
-                'quantity' => $quantity ,
+                'quantity' => $quantity,
             ];
             $orderItems[] = [
                 'product_id' => $product->id,
                 'quantity' => $quantity,
-                'unit_price' => $product->price
+                'unit_price' => $product->price,
             ];
         }
 
@@ -77,8 +76,8 @@ class CheckoutController extends Controller
             'customer' => $customer_id, // Crucial: Associate the customer with the session
             'line_items' => $line_items,
             'mode' => 'payment',
-            'success_url' => route('checkout.success', [], true) . '?session_id={CHECKOUT_SESSION_ID}',
-            'cancel_url' => route("checkout.failure", [], true),
+            'success_url' => route('checkout.success', [], true).'?session_id={CHECKOUT_SESSION_ID}',
+            'cancel_url' => route('checkout.failure', [], true),
         ]);
 
         // Order the line items
@@ -104,14 +103,13 @@ class CheckoutController extends Controller
             // 'type' => 'stripe',
             'created_by' => $user->id,
             'updated_by' => $user->id,
-            'session_id' => $session->id
+            'session_id' => $session->id,
         ];
         $payment = Payment::create($paymentDate);
 
-
-
         return redirect($session->url, 303);
     }
+
     public function success(Request $request)
     {
         \Stripe\Stripe::setApiKey(config('services.stripe.token'));
@@ -120,18 +118,18 @@ class CheckoutController extends Controller
 
         try {
             $session = $stripe->checkout->sessions->retrieve(id: $_GET['session_id']);
-            if (!$session or $session->payment_status !== 'paid') {
+            if (! $session or $session->payment_status !== 'paid') {
                 return view('checkout.failure', ['error' => 'Payment Session not successful']);
             }
 
             // First Payment to Status paid
             $payment = Payment::query()->where(['session_id' => $session->id])->whereIn('status', [PaymentStatus::Pending, PaymentStatus::Paid])->first();
 
-        // if (!$payment) {
-        //     throw new NotFoundHttpException();
-        // }
+            // if (!$payment) {
+            //     throw new NotFoundHttpException();
+            // }
 
-            if (!$payment) {
+            if (! $payment) {
                 // if (!$payment OR $payment->status !== PaymentStatus::Paid) {
                 return view('checkout.failure', ['error' => 'Payment record not found']);
             }
@@ -141,7 +139,7 @@ class CheckoutController extends Controller
 
             // Second Order to Status paid
             $order = $payment->order;
-            if (!$order) {
+            if (! $order) {
                 return view('checkout.failure', ['error' => 'Order not found']);
             }
             $order->status = OrderStatus::Paid;
@@ -152,10 +150,9 @@ class CheckoutController extends Controller
             // Third Remove from Cart
             CartItem::where('user_id', $user->id)->delete();
 
-
-
             // $customer = $stripe->customers->retrieve($session->customer);
             $customerName = $session->customer_details->name;
+
             return view('checkout.success', compact('customerName'));
         } catch (Error $e) {
 
@@ -163,13 +160,12 @@ class CheckoutController extends Controller
         }
     }
 
-
     public function failure(Request $request)
     {
         return view('checkout.cancel', ['error' => 'Order not found']);
     }
 
-    public function checkoutOrder(Order $order , Request $request)
+    public function checkoutOrder(Order $order, Request $request)
     {
         \Stripe\Stripe::setApiKey(getenv('STRIPE_SECRET_KEY'));
 
@@ -180,7 +176,7 @@ class CheckoutController extends Controller
                     'currency' => 'usd',
                     'product_data' => [
                         'name' => $item->product->title,
-//                        'images' => [$product->image]
+                        //                        'images' => [$product->image]
                     ],
                     'unit_amount' => $item->unit_price * 100,
                 ],
@@ -191,12 +187,11 @@ class CheckoutController extends Controller
         $session = \Stripe\Checkout\Session::create([
             'line_items' => $lineItems,
             'mode' => 'payment',
-            'success_url' => route('checkout.success', [], true) . '?session_id={CHECKOUT_SESSION_ID}',
+            'success_url' => route('checkout.success', [], true).'?session_id={CHECKOUT_SESSION_ID}',
             'cancel_url' => route('checkout.failure', [], true),
         ]);
         $order->payment->session_id = $session->id;
         $order->payment->save();
-
 
         return redirect($session->url);
     }

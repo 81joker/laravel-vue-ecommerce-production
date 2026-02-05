@@ -2,22 +2,18 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Models\Country;
-use App\Models\Api\User;
-use App\Models\Customer;
 use App\Enums\AddressType;
 use App\Enums\CustomerStatus;
-use App\Models\CustomerAddress;
-use Illuminate\Http\UploadedFile;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CustomerRequest;
 use App\Http\Resources\CountryResource;
-use Illuminate\Support\Facades\Storage;
-use App\Http\Requests\UpdateUserRequest;
-use App\Http\Resources\CustomerResource;
 use App\Http\Resources\CustomerListResource;
+use App\Http\Resources\CustomerResource;
+use App\Models\Country;
+use App\Models\Customer;
+use App\Models\CustomerAddress;
 use Illuminate\Support\Facades\DB;
-
+use Illuminate\Support\Facades\Storage;
 
 class CustomerController extends Controller
 {
@@ -33,41 +29,39 @@ class CustomerController extends Controller
         $sortDirection = request('sort_direction', 'desc');
 
         $query = Customer::query()->with('user')
-        ->orderBy("customers.$sortField", $sortDirection);
+            ->orderBy("customers.$sortField", $sortDirection);
         if ($search) {
             $query->where(DB::raw("CONCAT(first_name, ' ', last_name)"), 'like', "%{$search}%")
-            ->join('users', 'customers.user_id', '=', 'users.id')
-            ->orWhere('users.email', 'like', "%{$search}%")
-            ->orWhere('customers.phone', 'like', "%{$search}%");
-    
+                ->join('users', 'customers.user_id', '=', 'users.id')
+                ->orWhere('users.email', 'like', "%{$search}%")
+                ->orWhere('customers.phone', 'like', "%{$search}%");
+
         }
         $paginator = $query->paginate($perPage);
+
         return CustomerListResource::collection($paginator);
     }
 
-
-
-     /**
+    /**
      * Display the specified resource.
      *
-     * @param \App\Models\Customer $customer
      * @return \Illuminate\Http\Response
      */
     public function show(Customer $customer)
     {
         return new CustomerResource($customer);
     }
-      /**
+
+    /**
      * Update the specified resource in storage.
      *
-     * @param \Illuminate\Http\Request $request
-     * @param \App\Models\Customer     $customer
+     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
     public function update(CustomerRequest $request, Customer $customer)
     {
         $customerData = $request->validated();
-        //@todo Nehad user_id instead of updated_by
+        // @todo Nehad user_id instead of updated_by
         $customerData['updated_by'] = $request->user()->id;
         $customerData['status'] = $customerData['status'] ? CustomerStatus::Active->value : CustomerStatus::Disabled->value;
         $shippingData = $customerData['shippingAddress'];
@@ -127,9 +121,11 @@ class CustomerController extends Controller
      */
     public function destroy(Customer $customer)
     {
-         $customer->delete();
-         return response()->noContent();
+        $customer->delete();
+
+        return response()->noContent();
     }
+
     public function countries()
     {
         return CountryResource::collection(Country::query()->orderBy('name', 'asc')->get());

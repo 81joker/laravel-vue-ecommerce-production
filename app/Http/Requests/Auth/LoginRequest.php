@@ -2,13 +2,13 @@
 
 namespace App\Http\Requests\Auth;
 
+use App\Enums\CustomerStatus;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
-use App\Enums\CustomerStatus;
 
 class LoginRequest extends FormRequest
 {
@@ -52,16 +52,16 @@ class LoginRequest extends FormRequest
 
         $user = $this->user();
         $customer = $user->customer;
-        if ($customer->status != Null) {
+        if ($customer->status != null) {
             if ($customer->status !== CustomerStatus::Active->value) {
-            Auth::guard('web')->logout();
-            $this->session()->invalidate();
-            $this->session()->regenerateToken();
+                Auth::guard('web')->logout();
+                $this->session()->invalidate();
+                $this->session()->regenerateToken();
 
-            throw ValidationException::withMessages([
-                'email' => 'Your account has been disabled',
-            ]);
-        }
+                throw ValidationException::withMessages([
+                    'email' => 'Your account has been disabled',
+                ]);
+            }
         } else {
             throw ValidationException::withMessages([
                 'email' => 'Customer not found',

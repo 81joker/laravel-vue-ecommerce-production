@@ -2,8 +2,8 @@
 
 namespace App\Http\Resources;
 
-use Illuminate\Http\Request;
 use App\Enums\CustomerStatus;
+use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class CustomerResource extends JsonResource
@@ -19,6 +19,7 @@ class CustomerResource extends JsonResource
     {
         $shipping = $this->shippingAddress;
         $billing = $this->billingAddress;
+
         return [
             'id' => $this->user_id,
             'first_name' => $this->first_name,
@@ -46,7 +47,7 @@ class CustomerResource extends JsonResource
                 'state' => $billing?->state,
                 'zipcode' => $billing?->zipcode,
                 'country_code' => $billing?->country->code,
-            ]
+            ],
         ];
     }
 }

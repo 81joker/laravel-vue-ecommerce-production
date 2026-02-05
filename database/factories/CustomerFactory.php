@@ -23,6 +23,7 @@ class CustomerFactory extends Factory
     public function definition()
     {
         $user = User::factory()->create(); // Create a user
+
         return [
             'user_id' => $user->id, // Assign the user's ID to customer's user_id
             'first_name' => $this->faker->firstName(),

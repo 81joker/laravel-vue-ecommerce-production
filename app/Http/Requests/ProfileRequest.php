@@ -1,10 +1,10 @@
 <?php
 
 namespace App\Http\Requests;
-use App\Models\User;
 
-use Illuminate\Validation\Rule;
+use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class ProfileRequest extends FormRequest
 {
@@ -32,7 +32,7 @@ class ProfileRequest extends FormRequest
                 'lowercase',
                 'email',
                 'max:255',
-                Rule::unique(User::class)->ignore($this->user()->id),],
+                Rule::unique(User::class)->ignore($this->user()->id), ],
             'phone' => ['required', 'string', 'max:255'],
             'shipping.address1' => ['required', 'string', 'max:255'],
             'shipping.address2' => ['required', 'string', 'max:255'],
@@ -46,7 +46,7 @@ class ProfileRequest extends FormRequest
             'billing.city' => ['required'],
             'billing.state' => ['required'],
             'billing.zipcode' => ['required'],
-            'billing.country_code' => ['required', 'exists:countries,code']
+            'billing.country_code' => ['required', 'exists:countries,code'],
         ];
     }
 

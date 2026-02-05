@@ -6,10 +6,7 @@ use App\Helpers\Cart;
 use App\Models\CartItem;
 use App\Models\Product;
 use Illuminate\Http\Request;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cookie;
-
-
 
 class CartController extends Controller
 {
@@ -47,7 +44,7 @@ class CartController extends Controller
             }
 
             return response([
-                'count' => Cart::getCartItemsCount()
+                'count' => Cart::getCartItemsCount(),
             ]);
         } else {
             $cartItems = json_decode($request->cookie('cart_items', '[]'), true);
@@ -59,12 +56,12 @@ class CartController extends Controller
                     break;
                 }
             }
-            if (!$productFound) {
+            if (! $productFound) {
                 $cartItems[] = [
                     'user_id' => null,
                     'product_id' => $product->id,
                     'quantity' => $quantity,
-                    'price' => $product->price
+                    'price' => $product->price,
                 ];
             }
             Cookie::queue('cart_items', json_encode($cartItems), 60 * 24 * 30);
@@ -101,7 +98,7 @@ class CartController extends Controller
 
     public function updateQuantity(Request $request, Product $product)
     {
-        $quantity = (int)$request->post('quantity');
+        $quantity = (int) $request->post('quantity');
         $user = $request->user();
         if ($user) {
             CartItem::where(['user_id' => $request->user()->id, 'product_id' => $product->id])->update(['quantity' => $quantity]);
@@ -122,7 +119,4 @@ class CartController extends Controller
             return response(['count' => Cart::getCountFromItems($cartItems)]);
         }
     }
-
-
-
 }

@@ -4,7 +4,6 @@ namespace Database\Seeders;
 
 use App\Models\Country;
 use Illuminate\Database\Seeder;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
 class CountrySeeder extends Seeder
 {
@@ -14,22 +13,22 @@ class CountrySeeder extends Seeder
     public function run(): void
     {
         $bundesLänder = [
-            "BG" => "Burgenland",
-            "K" => "Kärnten",
-            "NÖ" => "Niederösterreich",
-            "OÖ" => "Oberösterreich",
-            "S" => "Salzburg",
-            "ST" => "Steiermark",
-            "T" => "Tirol",
-            "V" => "Vorarlberg",
-            "W" => "Wien"
+            'BG' => 'Burgenland',
+            'K' => 'Kärnten',
+            'NÖ' => 'Niederösterreich',
+            'OÖ' => 'Oberösterreich',
+            'S' => 'Salzburg',
+            'ST' => 'Steiermark',
+            'T' => 'Tirol',
+            'V' => 'Vorarlberg',
+            'W' => 'Wien',
         ];
         $usaStates = [
-            "AL" => 'Alabama',
-            "AK" => 'Alaska',
-            "AZ" => 'Arizona',
-            "AR" => 'Arkansas',
-            "CA" => 'California',
+            'AL' => 'Alabama',
+            'AK' => 'Alaska',
+            'AZ' => 'Arizona',
+            'AR' => 'Arkansas',
+            'CA' => 'California',
         ];
         $countries = [
             ['code' => 'geo', 'name' => 'Georgia', 'states' => null],

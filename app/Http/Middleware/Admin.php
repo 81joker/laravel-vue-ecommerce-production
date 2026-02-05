@@ -4,8 +4,8 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\Auth;
+use Symfony\Component\HttpFoundation\Response;
 
 class Admin
 {
@@ -20,9 +20,10 @@ class Admin
         if ($user && $user->is_admin == 1) {
             return $next($request);
         }
+
         return response([
-            'message' => 'You don\'t have permission to perform this action Middleware'
+            'message' => 'You don\'t have permission to perform this action Middleware',
         ], 403);
-    //   return response()->json(['message' => 'Unauthorized'], 403);
+        //   return response()->json(['message' => 'Unauthorized'], 403);
     }
 }

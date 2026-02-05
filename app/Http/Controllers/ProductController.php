@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
@@ -18,12 +17,12 @@ class ProductController extends Controller
 
     public function category(Category $category)
     {
-       $categories = Category::getAllChildrenByParent($category);
+        $categories = Category::getAllChildrenByParent($category);
 
         $query = Product::query()
             ->select('products.*')
             ->join('product_categories AS pc', 'pc.product_id', 'products.id')
-            ->whereIn('pc.category_id', array_map(fn($c) => $c->id, $categories));
+            ->whereIn('pc.category_id', array_map(fn ($c) => $c->id, $categories));
 
         return $this->renderProducts($query);
     }
@@ -59,7 +58,7 @@ class ProductController extends Controller
             ->paginate(6);
 
         return view('product.index', [
-            'products' => $products
+            'products' => $products,
         ]);
 
     }

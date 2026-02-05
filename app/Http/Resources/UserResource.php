@@ -9,6 +9,7 @@ use Nette\Utils\DateTime;
 class UserResource extends JsonResource
 {
     public static $wrap = 'user';
+
     /**
      * Transform the resource into an array.
      *

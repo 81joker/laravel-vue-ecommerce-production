@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Enums;
+
 // https://stackoverflow.com/questions/25705878/where-to-put-how-to-handle-enums-in-laravel
 enum AddressType: string
 {
@@ -19,6 +20,4 @@ enum AddressType: string
 ✔️ أنواع الدفع (Credit Card, PayPal)
 ✔️ أدوار المستخدم (Admin, User, Guest)
 ✔️ حالات الطلبات (Pending, Shipped, Delivered)
-
-
  */

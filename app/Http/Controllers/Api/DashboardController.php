@@ -12,7 +12,6 @@ use App\Models\Order;
 use App\Models\Product;
 use App\Traits\ReportTraits;
 use Carbon\Carbon;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
@@ -38,6 +37,7 @@ class DashboardController extends Controller
         if ($fromDate) {
             $query->where('created_at', '>', $fromDate);
         }
+
         return $query->count();
     }
 
@@ -53,6 +53,7 @@ class DashboardController extends Controller
 
             $query->where('created_at', '>', $fromDate);
         }
+
         return $query->sum('total_price');
     }
 
@@ -66,8 +67,7 @@ class DashboardController extends Controller
             ->join('countries AS c', 'a.country_code', '=', 'c.code')
             ->where('status', OrderStatus::Paid->value)
             ->where('a.type', AddressType::Billing->value)
-            ->groupBy('c.name')
-            ;
+            ->groupBy('c.name');
 
         if ($fromDate) {
             $query->where('orders.created_at', '>', $fromDate);

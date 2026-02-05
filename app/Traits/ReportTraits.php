@@ -4,8 +4,8 @@ namespace App\Traits;
 
 use Carbon\Carbon;
 
-trait ReportTraits {
-
+trait ReportTraits
+{
     private function getFromDate()
     {
         $request = \request();

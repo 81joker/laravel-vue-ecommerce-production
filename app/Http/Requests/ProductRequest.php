@@ -28,8 +28,8 @@ class ProductRequest extends FormRequest
             // 'image' => ['nullable', 'image'],
             'categories' => ['nullable'],
             // 'categories.*' => ['nullable' , 'int' , 'exists:cagtegory,id'],
-            'price' => ['required', 'numeric' , 'min:1'],
-            'quantity' => ['required', 'numeric' , 'min:0'],
+            'price' => ['required', 'numeric', 'min:1'],
+            'quantity' => ['required', 'numeric', 'min:0'],
             'description' => ['nullable', 'string'],
             'published' => ['required', 'boolean'],
         ];

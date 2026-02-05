@@ -2,18 +2,18 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Helpers\Cart;
 use App\Http\Controllers\Controller;
+use App\Models\Customer;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use Illuminate\View\View;
-use App\Helpers\Cart;
-use App\Models\Customer;
-use Illuminate\Support\Facades\DB;
 
 class RegisteredUserController extends Controller
 {
@@ -34,7 +34,7 @@ class RegisteredUserController extends Controller
     {
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
+            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
@@ -45,28 +45,30 @@ class RegisteredUserController extends Controller
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
             ]);
-    
+
             event(new Registered($user));
-    
-            $customer = new Customer();
-            $name = explode(" ", $request->name);
+
+            $customer = new Customer;
+            $name = explode(' ', $request->name);
             $customer->user_id = $user->id;
             // if (!isset($customer)) {
-                $customer->first_name = $name[0];
-                $customer->last_name = $name[1] ?? '';
-                $customer->save();
+            $customer->first_name = $name[0];
+            $customer->last_name = $name[1] ?? '';
+            $customer->save();
             // }
-    
+
             Auth::login($user);
         } catch (\Throwable $th) {
             // throw $th;
             DB::rollback();
-            return back()->withInput()->withErrors(['error' , 'Something went wrong while registering. Please try again.']);
+
+            return back()->withInput()->withErrors(['error', 'Something went wrong while registering. Please try again.']);
             // return back()->withInput($request->all())->withErrors(['error' => 'Something went wrong while registering. Please try again.']);
         }
         DB::commit();
 
         Cart::moveCartItemsIntoDb();
+
         return redirect(route('home', absolute: false));
         // return redirect(RouteServiceProvider::HOME);
 

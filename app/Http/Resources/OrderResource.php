@@ -4,7 +4,6 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-use Nette\Utils\DateTime;
 
 class OrderResource extends JsonResource
 {
@@ -17,7 +16,7 @@ class OrderResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        // To get the cutomer information from the request login 
+        // To get the cutomer information from the request login
         $customer = $this->user->customer;
         $shipping = $customer->shippingAddress;
         $billing = $customer->billingAddress;
@@ -26,7 +25,7 @@ class OrderResource extends JsonResource
             'id' => $this->id,
             'status' => $this->status,
             'total_price' => $this->total_price,
-            'items' => $this->items->map(fn($item) => [
+            'items' => $this->items->map(fn ($item) => [
                 'id' => $item->id,
                 'unit_price' => $item->unit_price,
                 'quantity' => $item->quantity,
@@ -35,7 +34,7 @@ class OrderResource extends JsonResource
                     'slug' => $item->product->slug,
                     'title' => $item->product->title,
                     'image' => $item->product->image,
-                ]
+                ],
             ]),
             'customer' => [
                 'id' => $this->user->id,
@@ -60,7 +59,7 @@ class OrderResource extends JsonResource
                     'state' => $billing->state,
                     'zipcode' => $billing->zipcode,
                     'country' => $billing->country->name,
-                ]
+                ],
             ],
             'created_at' => (new \DateTime($this->created_at))->format('Y-m-d H:i:s'),
             'updated_at' => (new \DateTime($this->updated_at))->format('Y-m-d H:i:s'),

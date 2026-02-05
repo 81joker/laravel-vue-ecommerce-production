@@ -2,18 +2,17 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Models\Api\Product;
-use App\Http\Resources\ProductResource;
-use App\Http\Resources\ProductListResource;
-use App\Http\Requests\ProductRequest;
-use Illuminate\Support\Facades\URL;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Str;
 use App\Http\Controllers\Controller;
-use App\Models\ProductImage;
+use App\Http\Requests\ProductRequest;
+use App\Http\Resources\ProductListResource;
+use App\Http\Resources\ProductResource;
+use App\Models\Api\Product;
 use App\Models\ProductCategory;
-
+use App\Models\ProductImage;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Str;
 
 class ProductController extends Controller
 {
@@ -38,7 +37,8 @@ class ProductController extends Controller
 
     /**
      * Store a newly created resource in storage.
-     * @param \Illuminate\Http\Request $request
+     *
+     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
     public function store(ProductRequest $request)
@@ -50,7 +50,7 @@ class ProductController extends Controller
         $data['updated_by'] = $request->user()->id;
         /** @var \Illuminate\Http\UploadedFile[] $images */
         $images = $data['images'] ?? [];
-        $categories = $data['categories']?? [];
+        $categories = $data['categories'] ?? [];
         $product = Product::create($data);
         $this->saveCategories($categories, $product);
 
@@ -76,7 +76,7 @@ class ProductController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param \App\Models\Product $product
+     * @param  \App\Models\Product  $product
      * @return \Illuminate\Http\Response
      */
     public function show(Product $product)
@@ -88,15 +88,14 @@ class ProductController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param \Illuminate\Http\Request $request
-     * @param \App\Models\Product      $product
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Models\Product  $product
      * @return \Illuminate\Http\Response
      */
     public function update(ProductRequest $request, Product $product)
     {
         $data = $request->validated();
         $data['updated_by'] = $request->user()->id;
-
 
         /** @var \Illuminate\Http\UploadedFile[] $images */
         $images = $data['images'] ?? [];
@@ -109,6 +108,7 @@ class ProductController extends Controller
         $categories = $data['categories'] ?? [];
         $product->update($data);
         $this->saveCategories($categories, $product);
+
         return new ProductResource($product);
 
         /*
@@ -137,17 +137,16 @@ class ProductController extends Controller
     public function destroy(Product $product)
     {
         $product->delete();
+
         return response()->noContent();
     }
 
-
-
     /**
-     *
-     *
-     * @param UploadedFile[] $images
+     * @param  UploadedFile[]  $images
      * @return string
+     *
      * @throws \Exception
+     *
      * @author Nehad Altimimi <nehad.al.timimi@gmail.com>
      */
     private function saveImages($images, Product $product)
@@ -159,8 +158,8 @@ class ProductController extends Controller
         // }
 
         foreach ($images as $id => $image) {
-            $path = 'images/' . Str::random();
-            if (!Storage::exists($path)) {
+            $path = 'images/'.Str::random();
+            if (! Storage::exists($path)) {
                 Storage::makeDirectory($path, 0755, true);
             }
             // $name = Str::random().'.'.$image->getClientOriginalExtension();
@@ -168,12 +167,12 @@ class ProductController extends Controller
             //     throw new \Exception("Unable to save file \"{$image->getClientOriginalName()}\"");
             // }
             $name = $image->store('images', 'public');
-            if (!Storage::putFileAS('public/', $image, $image->getClientOriginalName())) {
+            if (! Storage::putFileAS('public/', $image, $image->getClientOriginalName())) {
                 // if (!Storage::putFileAS('public/' . $path, $image, $image->getClientOriginalName())) {
                 throw new \Exception("Unable to save file \"{$image->getClientOriginalName()}\"");
             }
 
-            $relativePath =  '/' . $name;
+            $relativePath = '/'.$name;
             // $relativePath = $path . '/' . $name;
 
             ProductImage::create([
@@ -194,36 +193,37 @@ class ProductController extends Controller
     //     ProductCategory::insert($data);
     // }
     private function saveCategories($categoryIds, Product $product)
-{
-    // Convert JSON string to array if needed
-    if (is_string($categoryIds)) {
-        $categoryIds = json_decode($categoryIds, true) ?? [];
+    {
+        // Convert JSON string to array if needed
+        if (is_string($categoryIds)) {
+            $categoryIds = json_decode($categoryIds, true) ?? [];
+        }
+
+        // Ensure we have an array (could be null from json_decode)
+        $categoryIds = is_array($categoryIds) ? $categoryIds : [];
+
+        // Filter out any non-numeric values
+        $validCategoryIds = array_filter($categoryIds, function ($id) {
+            return is_numeric($id) || (is_string($id) && ctype_digit($id));
+        });
+
+        // Delete existing relationships
+        ProductCategory::where('product_id', $product->id)->delete();
+
+        // Only proceed if we have valid categories
+        if (! empty($validCategoryIds)) {
+            $data = array_map(function ($id) use ($product) {
+                return [
+                    'category_id' => (int) $id,  // Ensure integer type
+                    'product_id' => $product->id,
+
+                ];
+            }, $validCategoryIds);
+
+            ProductCategory::insert($data);
+        }
     }
 
-    // Ensure we have an array (could be null from json_decode)
-    $categoryIds = is_array($categoryIds) ? $categoryIds : [];
-
-    // Filter out any non-numeric values
-    $validCategoryIds = array_filter($categoryIds, function($id) {
-        return is_numeric($id) || (is_string($id) && ctype_digit($id));
-    });
-
-    // Delete existing relationships
-    ProductCategory::where('product_id', $product->id)->delete();
-
-    // Only proceed if we have valid categories
-    if (!empty($validCategoryIds)) {
-        $data = array_map(function($id) use ($product) {
-            return [
-                'category_id' => (int)$id,  // Ensure integer type
-                'product_id' => $product->id,
-
-            ];
-        }, $validCategoryIds);
-
-        ProductCategory::insert($data);
-    }
-}
     private function deleteImages($imageIds, Product $product)
     {
         $images = ProductImage::query()
@@ -234,7 +234,7 @@ class ProductController extends Controller
         foreach ($images as $image) {
             // If there is an old image, delete it
             if ($image->path) {
-                Storage::deleteDirectory('/public/' . dirname($image->path));
+                Storage::deleteDirectory('/public/'.dirname($image->path));
             }
             $image->delete();
         }
@@ -268,7 +268,6 @@ class ProductController extends Controller
     //     return $relativePath;
     // }
 }
-
 
 /*
 1. Delete Old Categories Linked to the Product

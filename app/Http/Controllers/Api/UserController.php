@@ -2,20 +2,16 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Models\Api\User;
-use Illuminate\Http\Request;
-use App\Http\Resources\UserResource;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\URL;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CreateUserRequest;
 use App\Http\Requests\UpdateUserRequest;
+use App\Http\Resources\UserResource;
+use App\Models\Api\User;
+use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Hash;
-
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class UserController extends Controller
 {
@@ -50,7 +46,8 @@ class UserController extends Controller
 
     /**
      * Store a newly created resource in storage.
-     * @param \Illuminate\Http\Request $request
+     *
+     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
     public function store(CreateUserRequest $request)
@@ -64,13 +61,14 @@ class UserController extends Controller
         $data['updated_by'] = $request->user()->id;
 
         $user = User::create($data);
+
         return new UserResource($user);
     }
 
     /**
      * Display the specified resource.
      *
-     * @param \App\Models\User $user
+     * @param  \App\Models\User  $user
      * @return \Illuminate\Http\Response
      */
     public function show(User $user)
@@ -78,11 +76,11 @@ class UserController extends Controller
         return new UserResource($user);
     }
 
-      /**
+    /**
      * Update the specified resource in storage.
      *
-     * @param \Illuminate\Http\Request $request
-     * @param \App\Models\User      $user
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Models\User  $user
      * @return \Illuminate\Http\Response
      */
     public function update(UpdateUserRequest $request, User $user)
@@ -100,18 +98,19 @@ class UserController extends Controller
      */
     public function destroy(User $user)
     {
-         $user->delete();
-         return response()->noContent();
+        $user->delete();
+
+        return response()->noContent();
     }
 
     private function saveImage(UploadedFile $image)
     {
         // $path = 'images/' . Str::random();
         $path = $image->store('images', 'public');
-        if (!Storage::putFileAS('public/' . $path, $image, $image->getClientOriginalName())) {
+        if (! Storage::putFileAS('public/'.$path, $image, $image->getClientOriginalName())) {
             throw new \Exception("Unable to save file \"{$image->getClientOriginalName()}\"");
         }
 
-        return $path . '/' ;
+        return $path.'/';
     }
 }

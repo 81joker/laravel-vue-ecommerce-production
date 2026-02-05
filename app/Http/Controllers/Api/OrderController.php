@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Models\Order;
-use Illuminate\Http\Request;
+use App\Enums\OrderStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\OrderListResource;
 use App\Http\Resources\OrderResource;
-use App\Enums\OrderStatus;
+use App\Models\Order;
+use Illuminate\Http\Request;
 
 class OrderController extends Controller
 {
@@ -29,6 +29,7 @@ class OrderController extends Controller
         return OrderListResource::collection($query);
         // return ProductListResource::collection(Product::query()->paginate(  10));
     }
+
     /**
      * Store a newly created resource in storage.
      */
@@ -37,6 +38,7 @@ class OrderController extends Controller
 
         return new OrderResource($order);
     }
+
     /**
      * Store a newly created resource in storage.
      */
@@ -44,6 +46,7 @@ class OrderController extends Controller
     {
         //
     }
+
     public function getStatuses()
     {
         return OrderStatus::getStatuses();

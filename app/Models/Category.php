@@ -13,6 +13,7 @@ class Category extends Model
     use HasFactory;
     use HasSlug;
     use SoftDeletes;
+
     // protected $table = 'categories';
     protected $fillable = ['name', 'slug', 'active', 'parent_id', 'created_by', 'updated_by'];
 
@@ -30,12 +31,13 @@ class Category extends Model
 
     public function products()
     {
-        return $this->belongsToMany(Product::class , 'product_categories');
+        return $this->belongsToMany(Product::class, 'product_categories');
     }
 
     public static function getActiveAsTree($resourceClassName = null)
     {
         $categories = Category::where('active', true)->orderBy('parent_id')->get();
+
         return self::buildCategoryTree($categories, null, $resourceClassName);
     }
 

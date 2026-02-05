@@ -17,14 +17,14 @@ class CategoryFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' =>  fake()->randomElement([
-            'Books',
-            'Electronics',
-            'Clothing',
-            'Food',
-            'Toys',
-            'Furniture',
-        ]),
+            'name' => fake()->randomElement([
+                'Books',
+                'Electronics',
+                'Clothing',
+                'Food',
+                'Toys',
+                'Furniture',
+            ]),
             'slug' => fake()->slug(),
             'active' => fake()->boolean(),
             'parent_id' => null,

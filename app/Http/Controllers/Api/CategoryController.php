@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreCategoryRequest;
 use App\Http\Requests\UpdateCategoryRequest;
-use App\Models\Category;
-use App\Http\Controllers\Controller;
 use App\Http\Resources\CategoryResource;
 use App\Http\Resources\CategoryTreeResource;
+use App\Models\Category;
 
 class CategoryController extends Controller
 {
@@ -23,6 +23,7 @@ class CategoryController extends Controller
 
         $categories = Category::query()
             ->orderBy("categories.$sortField", $sortDirection)->get();
+
         // if ($search) {
         //     $query->where('name', 'like', "%{$search}%");
         // }
@@ -39,10 +40,9 @@ class CategoryController extends Controller
         $data['created_by'] = $request->user()->id;
         $data['updated_by'] = $request->user()->id;
         $category = Category::create($data);
+
         return new CategoryResource($category);
     }
-
-
 
     /**
      * Update the specified resource in storage.
@@ -52,6 +52,7 @@ class CategoryController extends Controller
         $data = $request->validated();
         $data['updated_by'] = $request->user()->id;
         $category->update($data);
+
         return new CategoryResource($category);
     }
 
@@ -61,6 +62,7 @@ class CategoryController extends Controller
     public function destroy(Category $category)
     {
         $category->delete();
+
         return response()->noContent();
     }
 
