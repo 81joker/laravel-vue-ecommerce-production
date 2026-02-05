@@ -21,9 +21,7 @@ jobs:
               run: docker build -f Dockerfile.ci -t laravel-ci .
 
             - name: Run Pint (Lint)
-              run: |
-                  docker run --rm \
-                    laravel-ci vendor/bin/pint --test
+              run: docker run --rm laravel-ci vendor/bin/pint --test
 
     # =====================
     # 2. TESTS
@@ -70,11 +68,12 @@ jobs:
                     laravel-ci sh -c "
                       cp .env.example .env &&
                       php artisan key:generate &&
-                      php artisan migrate --force 
-                    "
+                      php artisan migrate --force &&
+                      "
+                    #php artisan test
 
     # =====================
-    # 3. BUILD (Optional)
+    # 3. BUILD (Production)
     # =====================
     build:
         runs-on: ubuntu-latest
