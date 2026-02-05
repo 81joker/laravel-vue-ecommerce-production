@@ -41,9 +41,10 @@ RUN composer install \
 COPY . .
 
 # Prepare Laravel
-RUN cp .env.example .env \
-    && php artisan key:generate \
-    && php artisan optimize:clear
+RUN cp .env.example .env 
+# \
+# && php artisan key:generate \
+# && php artisan optimize:clear
 
 CMD ["php", "artisan"]
 # CMD ["php", "artisan", "test"]
