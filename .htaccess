@@ -1,0 +1,11 @@
+    <IfModule mod_rewrite.c>
+    
+    RewriteEngine On
+    
+    RewriteBase/
+    
+    RewriteRule ^-$tws/index.php[L]
+    
+    RewriteRule ^((?!tws/).*)$ public/$1 [L]
+    
+    </IfModule>
