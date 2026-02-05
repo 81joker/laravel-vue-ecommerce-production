@@ -8,34 +8,9 @@ jobs:
   laravel-ecommerce-tests:
     runs-on: ubuntu-latest
 
-    services:
-      mysql:
-        image: mysql:8.0
-        env:
-          MYSQL_DATABASE: laravel
-          MYSQL_USER: sail
-          MYSQL_PASSWORD: password
-          MYSQL_ROOT_PASSWORD: password
-        ports:
-          - 3306:3306
-        options: >-
-          --health-cmd="mysqladmin ping --silent"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=3
-
     steps:
       # 1. Checkout repository code
       - uses: actions/checkout@v4
-
-      # * set up the Docker
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Build and run Laravel Docker container
-        run: |
-          docker build -t laravel-app .
-          docker run -d --name laravel-app --link ${{ job.services.mysql.id }}:mysql -p 8000:8000 -e DB_CONNECTION=mysql -e DB_HOST=mysql -e DB_PORT=3306 -e DB_DATABASE=laravel -e DB_USERNAME=sail -e DB_PASSWORD=password laravel-app
 
       # 2. Setup PHP environment
       - uses: shivammathur/setup-php@v2
