@@ -48,4 +48,5 @@ RUN cp .env.example .env \
     && php artisan optimize:clear
 
 # Default command (can be overridden in CI)
-CMD ["php", "artisan", "test"]
+CMD ["php", "artisan"]
+# CMD ["php", "artisan", "test"]
