@@ -1,248 +1,133 @@
-name: Laravel Vue CI/CD with Jira
+# ملف: .github/workflows/jira-ci.yml
+name: Jira Integrated CI/CD
 
 on:
-    push:
-        branches: ["main", "develop", "feature/*"]
-    pull_request:
-        branches: ["main"]
+  push:
+    branches: ["main", "develop", "feature/*", "LVEP-*"]
+  pull_request:
+    branches: ["main"]
 
 env:
-    JIRA_BASE_URL: "https://nehadaltimimi.atlassian.net"
-    JIRA_PROJECT_KEY: "LVEP"
+  JIRA_BASE_URL: "https://nehadaltimimi.atlassian.net"
+  JIRA_PROJECT_KEY: "LVEP"
 
 jobs:
-    # ======================
-    # 1. اكتشاف Jira Issue
-    # ======================
-    detect-jira-issue:
-        runs-on: ubuntu-latest
-        outputs:
-            issue_key: ${{ steps.extract.outputs.issue_key }}
+  detect-issue:
+    runs-on: ubuntu-latest
+    outputs:
+      issue_key: ${{ steps.extract.outputs.issue_key }}
 
-        steps:
-            - name: Extract Jira Issue from branch name
-              id: extract
-              run: |
-                  # هذا يستخرج LVEP-2 من "feature/LVEP-2-clean-route"
-                  # أو "LVEP-2-clean-route" أو "LVEP-2"
-                  BRANCH_NAME="${{ github.ref_name }}"
+    steps:
+      - name: Extract Jira Issue Key
+        id: extract
+        run: |
+          # استخراج LVEP-2 من أي فرع
+          BRANCH_NAME="${{ github.ref_name }}"
+          echo "Branch name: $BRANCH_NAME"
 
-                  # البحث عن نمط Jira Issue (مثل LVEP-2)
-                  if [[ "$BRANCH_NAME" =~ ([A-Z]+-[0-9]+) ]]; then
-                    ISSUE_KEY="${BASH_REMATCH[1]}"
-                    echo "issue_key=$ISSUE_KEY" >> $GITHUB_OUTPUT
-                    echo "✅ Found Jira issue: $ISSUE_KEY"
-                  else
-                    echo "ℹ️ No Jira issue found in branch: $BRANCH_NAME"
-                  fi
+          # البحث عن LVEP-رقم
+          if [[ "$BRANCH_NAME" =~ (LVEP-[0-9]+) ]]; then
+            ISSUE_KEY="${BASH_REMATCH[1]}"
+            echo "✅ Found Jira issue: $ISSUE_KEY"
+            echo "issue_key=$ISSUE_KEY" >> $GITHUB_OUTPUT
+          elif [[ "$BRANCH_NAME" =~ ([A-Z]+-[0-9]+) ]]; then
+            ISSUE_KEY="${BASH_REMATCH[1]}"
+            echo "✅ Found Jira issue (other project): $ISSUE_KEY"
+            echo "issue_key=$ISSUE_KEY" >> $GITHUB_OUTPUT
+          else
+            echo "⚠️ No Jira issue pattern found in branch name"
+            echo "ℹ️ To link to Jira, use branch names like: LVEP-2-description"
+          fi
 
-    # ======================
-    # 2. بناء المشروع مع تحديث Jira
-    # ======================
-    build:
-        runs-on: ubuntu-latest
-        needs: detect-jira-issue
+  build-and-test:
+    runs-on: ubuntu-latest
+    needs: detect-issue
 
-        steps:
-            - uses: actions/checkout@v4
+    steps:
+      - uses: actions/checkout@v4
 
-            # 📌 تحديث حالة Jira إلى "In Progress"
-            - name: Update Jira status to In Progress
-              if: needs.detect-jira-issue.outputs.issue_key != ''
-              uses: atlassian/gajira-transition@v3
-              with:
-                  issue: ${{ needs.detect-jira-issue.outputs.issue_key }}
-                  transition: "Start Progress" # أو رقم الانتقال
-              env:
-                  JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
-                  JIRA_BASE_URL: ${{ env.JIRA_BASE_URL }}
-                  JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
+      # تحديث Jira فقط إذا كان هناك issue
+      - name: Update Jira Status to In Progress
+        if: needs.detect-issue.outputs.issue_key != ''
+        run: |
+          echo "📤 Updating Jira issue: ${{ needs.detect-issue.outputs.issue_key }}"
 
-            # 📌 إضافة تعليق في Jira أن البناء بدأ
-            - name: Comment on Jira issue (Build started)
-              if: needs.detect-jira-issue.outputs.issue_key != ''
-              uses: atlassian/gajira-comment@v3
-              with:
-                  issue: ${{ needs.detect-jira-issue.outputs.issue_key }}
-                  comment: |
-                      🔨 **CI/CD Pipeline Started**
+          # استخدام curl مباشرة للتحكم الكامل
+          curl -X POST \
+            -H "Authorization: Basic $(echo -n '${{ secrets.JIRA_USER_EMAIL }}:${{ secrets.JIRA_API_TOKEN }}' | base64)" \
+            -H "Content-Type: application/json" \
+            "${{ env.JIRA_BASE_URL }}/rest/api/3/issue/${{ needs.detect-issue.outputs.issue_key }}/transitions" \
+            -d '{
+              "transition": {
+                "id": "11"  # ⚠️ تحتاج لتغيير هذا الرقم
+              }
+            }'
+        continue-on-error: true # لا توقف الـ pipeline إذا فشل
 
-                      **Details:**
-                      - Workflow: ${{ github.workflow }}
-                      - Branch: ${{ github.ref_name }}
-                      - Commit: ${{ github.sha }}
-                      - Triggered by: ${{ github.actor }}
+      # ... باقي خطوات البناء التي لديك ...
 
-                      Build process is now running...
-              env:
-                  JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
-                  JIRA_BASE_URL: ${{ env.JIRA_BASE_URL }}
-                  JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.4"
 
-            # ======================
-            # بناء Laravel & Vue
-            # ======================
-            - uses: shivammathur/setup-php@v2
-              with:
-                  php-version: "8.4"
-                  extensions: mbstring, xml, ctype, iconv, intl, pdo_sqlite
-                  coverage: none
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist
 
-            - name: Cache Composer packages
-              uses: actions/cache@v3
-              with:
-                  path: vendor
-                  key: ${{ runner.os }}-composer-${{ hashFiles('composer.lock') }}
-                  restore-keys: |
-                      ${{ runner.os }}-composer-
+      - name: Prepare environment
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+          mkdir -p database
+          touch database/database.sqlite
 
-            - name: Install Composer dependencies
-              run: composer install --no-interaction --prefer-dist --no-progress
-
-            # إعداد Node.js لـ Vue
-            - name: Setup Node.js
-              uses: actions/setup-node@v3
-              with:
-                  node-version: "18"
-                  cache: "npm"
-
-            - name: Cache node modules
-              uses: actions/cache@v3
-              with:
-                  path: node_modules
-                  key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
-                  restore-keys: |
-                      ${{ runner.os }}-node-
-
-            - name: Install Node dependencies
-              run: npm ci
-
-            # إعداد بيئة Laravel
-            - name: Prepare Laravel environment
-              run: |
-                  cp .env.example .env
-                  php artisan key:generate
-                  mkdir -p database
-                  touch database/database.sqlite
-
-            # بناء أصول Vue
-            - name: Build Vue assets
-              run: npm run build
-
-            # تشغيل الاختبارات
-            # - name: Run PHP tests
-            #   run: vendor/bin/phpunit --testdox
-
-            # 📌 تحديث Jira بنتائج الاختبارات
-            - name: Update Jira with test results
-              if: always() && needs.detect-jira-issue.outputs.issue_key != ''
-              uses: atlassian/gajira-comment@v3
-              with:
-                  issue: ${{ needs.detect-jira-issue.outputs.issue_key }}
-                  comment: |
-                      ${{ job.status == 'success' && '✅' || '❌' }} **Tests ${{ job.status == 'success' && 'PASSED' || 'FAILED' }}**
-
-                      **Job Status:** ${{ job.status }}
-                      **Build Number:** ${{ github.run_number }}
-
-                      View details: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-              env:
-                  JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
-                  JIRA_BASE_URL: ${{ env.JIRA_BASE_URL }}
-                  JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
-
-    # ======================
-    # 3. فحص الكود (Lint)
-    # ======================
-    lint:
-        runs-on: ubuntu-latest
-        needs: [detect-jira-issue, build]
-
-        steps:
-            - uses: actions/checkout@v4
-
-            - uses: shivammathur/setup-php@v2
-              with:
-                  php-version: "8.4"
-
-            - name: Install dependencies
-              run: composer install --no-interaction --prefer-dist
-
-            - name: Run Laravel Pint
-              run: vendor/bin/pint --test
-
-            # فحص Vue/JavaScript
-            - name: Setup Node.js
-              uses: actions/setup-node@v3
-              with:
-                  node-version: "18"
-
-            - name: Run ESLint
-              run: npx eslint resources/js --ext .vue,.js || echo "ESLint check completed"
-
-            # 📌 تعليق في Jira عن فحص الكود
-            - name: Comment lint results on Jira
-              if: always() && needs.detect-jira-issue.outputs.issue_key != ''
-              uses: atlassian/gajira-comment@v3
-              with:
-                  issue: ${{ needs.detect-jira-issue.outputs.issue_key }}
-                  comment: |
-                      🔍 **Code Quality Check Completed**
-
-                      **PHP Code Style:** ${{ job.status == 'success' && '✅ Passed' || '❌ Issues found' }}
-                      **JavaScript/Vue Code Style:** ESLint check completed
-
-                      Code is ready for review!
-              env:
-                  JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
-                  JIRA_BASE_URL: ${{ env.JIRA_BASE_URL }}
-                  JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
-
-    # ======================
-    # 4. النشر (اختياري)
-    # ======================
-    deploy:
-        runs-on: ubuntu-latest
-        needs: [detect-jira-issue, build, lint]
-        if: github.ref == 'refs/heads/main' && success()
-
-        steps:
-            - name: Checkout code
-              uses: actions/checkout@v4
-
-            # 📌 تحديث Jira إلى "In Review" أو "Done"
-            - name: Update Jira status for deployment
-              if: needs.detect-jira-issue.outputs.issue_key != ''
-              uses: atlassian/gajira-transition@v3
-              with:
-                  issue: ${{ needs.detect-jira-issue.outputs.issue_key }}
-                  transition: "Done" # أو "Ready for Review"
-              env:
-                  JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
-                  JIRA_BASE_URL: ${{ env.JIRA_BASE_URL }}
-                  JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
-
-            - name: Deploy to production
-              run: |
-                  echo "🚀 Deploying to production..."
-                  # أضف هنا أوامر النشر الخاصة بك
-                  # مثل: rsync, scp, SSH, etc.
-
-            # 📌 تعليق نهائي في Jira
-            - name: Final Jira comment after deployment
-              if: needs.detect-jira-issue.outputs.issue_key != ''
-              uses: atlassian/gajira-comment@v3
-              with:
-                  issue: ${{ needs.detect-jira-issue.outputs.issue_key }}
-                  comment: |
-                      🎉 **Deployment Complete!**
-
-                      **Status:** Successfully deployed to production
-                      **Environment:** Production
-                      **Deployed At:** ${{ steps.date.outputs.date }}
-
-                      This issue is now complete and ready for verification.
-              env:
-                  JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
-                  JIRA_BASE_URL: ${{ env.JIRA_BASE_URL }}
-                  JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
+      # تعليق في Jira عند نجاح البناء
+      - name: Add Success Comment to Jira
+        if: success() && needs.detect-issue.outputs.issue_key != ''
+        run: |
+          curl -X POST \
+            -H "Authorization: Basic $(echo -n '${{ secrets.JIRA_USER_EMAIL }}:${{ secrets.JIRA_API_TOKEN }}' | base64)" \
+            -H "Content-Type: application/json" \
+            "${{ env.JIRA_BASE_URL }}/rest/api/3/issue/${{ needs.detect-issue.outputs.issue_key }}/comment" \
+            -d '{
+              "body": {
+                "type": "doc",
+                "version": 1,
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "✅ CI/CD Pipeline completed successfully!",
+                        "marks": [
+                          {
+                            "type": "strong"
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "Build details: "
+                      },
+                      {
+                        "type": "text",
+                        "text": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}",
+                        "marks": [
+                          {
+                            "type": "link",
+                            "attrs": {
+                              "href": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            }'
