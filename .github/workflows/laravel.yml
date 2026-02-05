@@ -46,3 +46,10 @@ jobs:
             \"text\": \"❌ CI Failed\nProject: laravel-vue-ecommerce-production\nBranch: ${{ github.ref_name }}\nRun: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}\"
           }" \
           ${{ secrets.SLACK_WEBHOOK_URL }}
+
+      - name: Notify Slack (Success)
+        if: success()
+        run: |
+          curl -X POST -H 'Content-type: application/json' \
+          --data "{\"text\":\"✅ CI Passed for laravel-vue-ecommerce-production\"}" \
+          ${{ secrets.SLACK_WEBHOOK_URL }}
