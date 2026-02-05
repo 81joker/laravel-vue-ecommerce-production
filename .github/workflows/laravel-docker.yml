@@ -1,0 +1,49 @@
+name: Laravel Docker CI
+on:
+    push:
+        branches: ["main"]
+
+jobs:
+    laravel-docker-ci:
+        runs-on: ubuntu-latest
+
+        services:
+            mysql:
+                image: mysql:8.0
+                env:
+                    MYSQL_DATABASE: laravel
+                    MYSQL_USER: sail
+                    MYSQL_PASSWORD: password
+                    MYSQL_ROOT_PASSWORD: password
+                ports:
+                    - 3306:3306
+                options: >-
+                    --health-cmd="mysqladmin ping --silent"
+                    --health-interval=10s
+                    --health-timeout=5s
+                    --health-retries=5
+
+        steps:
+            # 1. Checkout repository
+            - uses: actions/checkout@v4
+
+            # 2. Set up Docker Buildx
+            - name: Set up Docker Buildx
+              uses: docker/setup-buildx-action@v3
+
+            # 3. Build Laravel Docker image
+            - name: Build Docker image
+              run: docker build -t laravel-app .
+
+            # 4. Run Laravel tests inside Docker container
+            - name: Run tests inside Docker
+              run: |
+                  docker run --rm \
+                    -e APP_ENV=testing \
+                    -e DB_CONNECTION=mysql \
+                    -e DB_HOST=mysql \
+                    -e DB_PORT=3306 \
+                    -e DB_DATABASE=laravel \
+                    -e DB_USERNAME=sail \
+                    -e DB_PASSWORD=password \
+                    laravel-app php artisan test
