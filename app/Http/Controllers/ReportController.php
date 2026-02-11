@@ -27,7 +27,9 @@ class ReportController extends Controller
     }
 
     private function prepareDataForBarChart($query, $label)
-    {
+    {       
+        //TODO:  @nehad You should check getFormDate() method and make sure
+        //  it returns a valid date or null. If it returns null, you can set a default date (e.g., 30 days ago) to ensure the query works correctly.
         $fromDate = $this->getFromDate() ?: Carbon::now()->subDay(30);
         $query
             ->select([DB::raw('CAST(created_at as DATE) AS day'), DB::raw('COUNT(created_at) AS count')])
