@@ -7,7 +7,8 @@
     "dev": "vite --port=3000",
     "build": "vite build",
     "preview": "vite preview",
-    "lint": "eslint . --ext .js,.vue",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "format": "prettier --write ."
   },
   "dependencies": {
