@@ -1,3 +1,3 @@
 
 1- Install Laravel Pint
-2- Instll
+2- Instll Laravel cs fixer
