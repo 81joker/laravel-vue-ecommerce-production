@@ -15,5 +15,5 @@ app.use(router)
 app.use(store)
 app.mount('#app')
 app.config.globalProperties.$filters = {
-    currencyEUR
+  currencyEUR,
 }

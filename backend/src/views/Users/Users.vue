@@ -12,45 +12,43 @@
       </button>
     </div>
     <UsersTable @clickEdit="editUser" />
-  <UserModal v-model="showModal"  :user="userModel" />
+    <UserModal v-model="showModal" :user="userModel" />
   </div>
 </template>
 <script setup>
-import { ref } from "vue";
-import UserModal from "./UserModal.vue";
-import UsersTable from "./UsersTable.vue";
-import store from "../../store";
+import { ref } from 'vue'
+import UserModal from './UserModal.vue'
+import UsersTable from './UsersTable.vue'
+import store from '../../store'
 
 const userModel = ref({
   id: '',
-  title: "",
+  title: '',
   image: '',
-  description: "",
+  description: '',
   price: '',
-});
+})
 
 // function showAddNewModal() {
 //   showUserModal.value = true
 // }
 const showModal = ref(false)
 
-  function showUserModal() {
-    showModal.value = true
-  }
-  
-  function editUser(u) {
-    
-      userModel.value = u
-      showUserModal()
-      // showAddNewModal();
+function showUserModal() {
+  showModal.value = true
+}
+
+function editUser(u) {
+  userModel.value = u
+  showUserModal()
+  // showAddNewModal();
 }
 //   function editUser(p) {
 //   store.dispatch('getUser', p.id)
-//     .then(({data}) => {      
+//     .then(({data}) => {
 //       userModel.value = data
 //       showUserModal()
 //       // showAddNewModal();
 //     })
 // }
-
 </script>

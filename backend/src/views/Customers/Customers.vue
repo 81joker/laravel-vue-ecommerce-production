@@ -12,33 +12,33 @@
       </button>
     </div>
     <CustomersTable @clickEdit="editCustomer" />
-   <CustomerModal v-model="showModal"  :customer="customerModel" />
+    <CustomerModal v-model="showModal" :customer="customerModel" />
   </div>
 </template>
 <script setup>
-import { ref } from "vue";
-import CustomerModal from "./CustomerModal.vue";
-import CustomersTable from "./CustomersTable.vue";
-import store from "../../store";
+import { ref } from 'vue'
+import CustomerModal from './CustomerModal.vue'
+import CustomersTable from './CustomersTable.vue'
+import store from '../../store'
 
 const customerModel = ref({
   id: '',
-  first_name: "",
+  first_name: '',
   last_name: '',
-  phone: "",
+  phone: '',
   status: '',
-   email: "",
+  email: '',
   // address: "",
-});
+})
 
 // function showAddNewModal() {
 //   showCustomerModal.value = true
 // }
 const showModal = ref(false)
 
-  function showCustomerModal() {
-    showModal.value = true
-  }
+function showCustomerModal() {
+  showModal.value = true
+}
 
 //   function editCustomer(c) {
 
@@ -46,13 +46,11 @@ const showModal = ref(false)
 //       showCustomerModal()
 //       // showAddNewModal();
 // }
-  function editCustomer(c) {
-  store.dispatch('getCustomer', c.id)
-    .then(({data}) => {
+function editCustomer(c) {
+  store.dispatch('getCustomer', c.id).then(({ data }) => {
     customerModel.value = data
-      showCustomerModal()
-      // showAddNewModal();
-    })
+    showCustomerModal()
+    // showAddNewModal();
+  })
 }
-
 </script>

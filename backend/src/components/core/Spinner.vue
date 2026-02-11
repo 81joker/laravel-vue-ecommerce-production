@@ -20,25 +20,21 @@
         d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
       ></path>
     </svg>
-    <div class="mt-2" v-if="text">{{text}}</div>
+    <div class="mt-2" v-if="text">{{ text }}</div>
   </div>
 </template>
 
 <script setup>
-
-const {text} = defineProps({
+const { text } = defineProps({
   text: {
     type: String,
-    default: 'Please Wait...'
+    default: 'Please Wait...',
   },
-  classes:{
+  classes: {
     String,
-    default: "py-8"
-  }
+    default: 'py-8',
+  },
 })
-
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>
