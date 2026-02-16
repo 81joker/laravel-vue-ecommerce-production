@@ -2,7 +2,7 @@ name: Laravel Vue API Axios E-Commerce Application CI/CD
 
 on:
   push:
-    branches: ["main"]
+    branches: ["*"]
 
 jobs:
   laravel-ecommerce-tests:

@@ -15,9 +15,9 @@ return new class extends Migration
             $table->id();
             $table->string('title', 2000)->nullable();
             $table->string('slug', 2000)->nullable();
-            $table->string('image')->nullable();
-            $table->string('image_mime')->nullable();
-            $table->string('image_size')->nullable();
+            // $table->string('image')->nullable();
+            // $table->string('image_mime')->nullable();
+            // $table->string('image_size')->nullable();
             $table->longText('description')->nullable();
             $table->decimal('price', 10)->nullable();
             $table->integer('quantity')->nullable();

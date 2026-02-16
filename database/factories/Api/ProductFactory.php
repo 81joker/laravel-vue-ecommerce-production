@@ -2,7 +2,6 @@
 
 namespace Database\Factories\Api;
 
-use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -17,17 +16,21 @@ class ProductFactory extends Factory
      */
     public function definition(): array
     {
+        // $categories = \App\Models\Category::factory()->count(2)->create();
+
         return [
             'title' => $this->faker->sentence(3),
             'slug' => $this->faker->slug(),
-            'image' => null,
-            'image_mime' => null,
-            'image_size' => null,
+            // 'image' => [$image],
+            // 'image_mime' => null,
+            // 'image_size' => null,
             'description' => $this->faker->paragraph(),
             'price' => $this->faker->randomFloat(2, 1, 100),
             'quantity' => $this->faker->numberBetween(1, 100),
-            'created_by' => User::factory(),
-            'updated_by' => User::factory(),
+            // 'categories' => $categories->pluck('id')->toArray(),
+            'published' => $this->faker->boolean(),
+            'created_by' => \App\Models\User::factory(),
+            'updated_by' => \App\Models\User::factory(),
         ];
     }
 }

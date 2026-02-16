@@ -17,7 +17,7 @@ namespace App\Models\Api {
      * @property string|null $image_size
      * @property string|null $image_mime
      * @property string|null $slug
-     * @property string $title
+     * @property string|null $title
      * @property int $id
      * @property-read mixed $image
      * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\ProductImage> $images
@@ -671,7 +671,7 @@ namespace App\Models {
      * @property string|null $image_size
      * @property string|null $image_mime
      * @property string|null $slug
-     * @property string $title
+     * @property string|null $title
      * @property int $id
      * @property-read mixed $image
      * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\ProductImage> $images

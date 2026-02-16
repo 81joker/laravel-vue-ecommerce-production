@@ -17,7 +17,9 @@ class Product extends Model
     use HasSlug;
     use SoftDeletes;
 
-    protected $fillable = ['title', 'description', 'price', 'quantity', 'image', 'image_name', 'image_mime', 'image_size', 'published', 'created_by', 'updated_by'];
+    // TODO: you should constrol if image_name existis or not
+    protected $fillable = ['title', 'description', 'price', 'quantity', 'published', 'created_by', 'updated_by'];
+    // protected $fillable = ['title', 'description', 'price', 'quantity', 'image', 'image_name', 'image_mime', 'image_size', 'published', 'created_by', 'updated_by'];
 
     protected $casts = [
         'published' => 'boolean',
