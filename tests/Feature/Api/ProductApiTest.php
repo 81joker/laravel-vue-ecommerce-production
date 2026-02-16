@@ -6,7 +6,6 @@ use App\Models\Api\Product;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
-use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
@@ -137,7 +136,7 @@ class ProductApiTest extends TestCase
 
         $this->assertDatabaseHas('products', [
             'id' => $product->id,
-            'title' => 'Updated'
+            'title' => 'Updated',
         ]);
     }
 
@@ -152,7 +151,7 @@ class ProductApiTest extends TestCase
         $response->assertStatus(204);
 
         $this->assertSoftDeleted('products', [
-            'id' => $product->id
+            'id' => $product->id,
         ]);
     }
 }
