@@ -13,11 +13,9 @@ class ProductApiTest extends TestCase
 {
     use RefreshDatabase, WithFaker;
 
-
-
     protected $admin;
 
-    public function setUp(): void
+    protected function setUp(): void
     {
         parent::setUp();
 
@@ -25,7 +23,6 @@ class ProductApiTest extends TestCase
             'is_admin' => true,
         ]);
     }
-
 
     // Security Tests for Product API
     public function test_guest_cannot_access_products_api()
