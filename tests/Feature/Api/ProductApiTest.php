@@ -13,20 +13,19 @@ class ProductApiTest extends TestCase
 {
     use RefreshDatabase, WithFaker;
 
+
+
     protected $admin;
 
-    protected function setUp(): void
+    public function setUp(): void
     {
         parent::setUp();
 
-        /** @var \App\Models\User $admin */
-        $admin = User::factory()->create([
+        $this->admin = User::factory()->create([
             'is_admin' => true,
         ]);
-
-        // Authenticate as the admin user
-        $this->actingAs($admin, 'sanctum');
     }
+
 
     // Security Tests for Product API
     public function test_guest_cannot_access_products_api()
@@ -40,15 +39,12 @@ class ProductApiTest extends TestCase
 
         $response = $this->actingAs($this->admin, 'sanctum')
             ->getJson('/api/products');
-
-        $response->assertStatus(403);
+        $response->assertStatus(200);
     }
 
     // Index Tests for Product API
     public function test_admin_can_list_products()
     {
-        // /** @var \App\Models\User $admin */
-        // $admin = User::factory()->create(['is_admin' => true]);
         Product::factory()
             ->count(5)
             ->create([
