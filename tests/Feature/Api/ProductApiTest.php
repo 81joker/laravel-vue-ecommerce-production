@@ -12,7 +12,7 @@ class ProductApiTest extends TestCase
 {
     use RefreshDatabase, WithFaker;
 
-    // Security Tests for Product API   
+    // Security Tests for Product API
     public function test_guest_cannot_access_products_api()
     {
         $response = $this->getJson('/api/products');
@@ -22,7 +22,7 @@ class ProductApiTest extends TestCase
     public function test_non_admin_cannot_access_products_api()
     {
         $user = User::factory()->createOne([
-            'is_admin' => false
+            'is_admin' => false,
         ]);
         if ($user) {
             return $user;
@@ -34,7 +34,6 @@ class ProductApiTest extends TestCase
         $response->assertStatus(403);
     }
 
-
     // Index Tests for Product API
     public function test_admin_can_list_products()
     {
@@ -44,7 +43,7 @@ class ProductApiTest extends TestCase
         Product::factory()
             ->count(5)
             ->create([
-                'created_by' => $admin->id
+                'created_by' => $admin->id,
             ]);
 
         $response = $this->actingAs($admin, 'sanctum')
@@ -54,7 +53,7 @@ class ProductApiTest extends TestCase
             ->assertJsonStructure([
                 'data',
                 'links',
-                'meta'
+                'meta',
             ]);
     }
 }
