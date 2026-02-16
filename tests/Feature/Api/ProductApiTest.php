@@ -6,6 +6,7 @@ use App\Models\Api\Product;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
@@ -89,5 +90,69 @@ class ProductApiTest extends TestCase
 
         // FIXME: The product_categories table is not being populated correctly in the test environment. This may be due to the way the factory is set up or how the categories are being handled in the test. Further investigation is needed to determine the root cause of this issue.
         // $this->assertDatabaseCount('product_categories', 2);
+    }
+
+    // Validation Tests for Product API
+
+    public function test_product_creation_requires_title()
+    {
+
+        $response = $this->actingAs($this->admin, 'sanctum')
+            ->postJson('/api/products', []);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['title']);
+    }
+
+    public function test_product_creation_requires_price()
+    {
+        $response = $this->actingAs($this->admin, 'sanctum')
+            ->postJson('/api/products', [
+                'title' => 'Test Product',
+            ]);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['price']);
+    }
+
+    // Update Test (Includes Image Deletion)
+    public function test_admin_can_update_product()
+    {
+        Storage::fake('public');
+
+        $product = Product::factory()->create();
+
+        $response = $this->actingAs($this->admin, 'sanctum')
+            ->putJson("/api/products/{$product->id}", [
+                'title' => 'Updated',
+                'price' => 200,
+                'status' => 1,
+                'description' => 'This is an updated test product.',
+                'quantity' => 20,
+                'published' => true,
+                'updated_by' => $this->admin->id,
+            ]);
+
+        $response->assertStatus(200);
+
+        $this->assertDatabaseHas('products', [
+            'id' => $product->id,
+            'title' => 'Updated'
+        ]);
+    }
+
+    // Delete Test
+    public function test_admin_can_delete_product()
+    {
+        $product = Product::factory()->create();
+
+        $response = $this->actingAs($this->admin, 'sanctum')
+            ->deleteJson("/api/products/{$product->id}");
+
+        $response->assertStatus(204);
+
+        $this->assertSoftDeleted('products', [
+            'id' => $product->id
+        ]);
     }
 }
